@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { runAnalysis } from '@/lib/analyze';
 
 export async function POST(req: NextRequest) {
   try {
@@ -20,13 +21,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Failed to complete interview' }, { status: 500 });
     }
 
-    // Trigger async analysis — fire and forget
-    const baseUrl = req.nextUrl.origin;
-    fetch(`${baseUrl}/api/analyze`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ interview_id }),
-    }).catch((err) => console.error('Failed to trigger analysis:', err));
+    // Run analysis directly — no HTTP round-trip, avoids Vercel deployment protection
+    runAnalysis(interview_id).catch((err) =>
+      console.error('Analysis failed for interview:', interview_id, err)
+    );
 
     return NextResponse.json({ success: true });
   } catch (err) {
