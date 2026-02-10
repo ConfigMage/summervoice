@@ -6,6 +6,7 @@ import InterviewList from './InterviewList';
 import InterviewDetail from './InterviewDetail';
 import SafetyAlerts from './SafetyAlerts';
 import AggregateCharts from './AggregateCharts';
+import SettingsPanel from './SettingsPanel';
 import ExportButton from './ExportButton';
 
 interface Interview {
@@ -28,7 +29,7 @@ interface Interview {
   }>;
 }
 
-type Tab = 'overview' | 'interviews' | 'safety' | 'aggregate';
+type Tab = 'overview' | 'interviews' | 'safety' | 'aggregate' | 'settings';
 
 interface AdminDashboardProps {
   password: string;
@@ -94,6 +95,7 @@ export default function AdminDashboard({ password }: AdminDashboardProps) {
     { id: 'interviews', label: 'Interviews' },
     { id: 'safety', label: `Safety Alerts${flagged.length > 0 ? ` (${flagged.length})` : ''}`, alert: flagged.length > 0 },
     { id: 'aggregate', label: 'Aggregate Data' },
+    { id: 'settings', label: 'Settings' },
   ];
 
   return (
@@ -189,6 +191,10 @@ export default function AdminDashboard({ password }: AdminDashboardProps) {
 
         {tab === 'aggregate' && (
           <AggregateCharts password={password} />
+        )}
+
+        {tab === 'settings' && (
+          <SettingsPanel password={password} />
         )}
       </div>
     </div>

@@ -2,6 +2,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { getSupabaseAdmin } from '@/lib/supabase';
 import { ANALYZER_SYSTEM_PROMPT } from '@/lib/prompts/analyzer';
 import { getSurveyItemsText } from '@/lib/constants/survey-items';
+import { getSettings } from '@/lib/settings';
 
 // Valid values that match the DB check constraint
 const VALID_RATING_VALUES = new Set([
@@ -108,10 +109,14 @@ ${getSurveyItemsText()}
 
 Please analyze this transcript and produce the structured JSON output.`;
 
-  console.log('Starting analysis for interview:', interview_id);
+  // Get model from settings
+  const settings = await getSettings();
+  const analysisModel = settings.analysis_model;
+
+  console.log('Starting analysis for interview:', interview_id, 'using model:', analysisModel);
 
   const response = await client.messages.create({
-    model: 'claude-sonnet-4-5-20250929',
+    model: analysisModel,
     max_tokens: 8192,
     system: ANALYZER_SYSTEM_PROMPT,
     messages: [{ role: 'user', content: userMessage }],

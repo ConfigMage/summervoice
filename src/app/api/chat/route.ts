@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { supabaseAdmin } from '@/lib/supabase';
 import { getInterviewerSystemPrompt } from '@/lib/prompts/interviewer';
+import { getSettings } from '@/lib/settings';
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -62,9 +63,13 @@ export async function POST(req: NextRequest) {
       content: m.content,
     }));
 
+    // Get model from settings
+    const settings = await getSettings();
+    const chatModel = settings.chat_model;
+
     // Stream response from Anthropic
     const stream = client.messages.stream({
-      model: 'claude-sonnet-4-5-20250929',
+      model: chatModel,
       max_tokens: 1024,
       system: getInterviewerSystemPrompt(interview.grade),
       messages: conversationHistory,
@@ -100,7 +105,7 @@ export async function POST(req: NextRequest) {
           // Retry once on failure
           try {
             const retryResponse = await client.messages.create({
-              model: 'claude-sonnet-4-5-20250929',
+              model: chatModel,
               max_tokens: 1024,
               system: getInterviewerSystemPrompt(interview.grade),
               messages: conversationHistory,
